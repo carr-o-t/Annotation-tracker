@@ -1,0 +1,27 @@
+.left {
+    background-color: cornflowerblue;
+    border-radius: 0.5em;
+    padding: 0;
+    margin: 0;
+}
+
+.records-list{
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.list-item{
+width: 30ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0.3em;
+}
+
+.list-item:hover{
+    cursor: pointer;
+    background-color: rgba(0, 140, 255, 0.253);
+}
