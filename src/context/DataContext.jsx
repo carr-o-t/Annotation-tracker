@@ -13,28 +13,60 @@ export const useDataContext = () => {
 
 export default function DataProvider({ children }) {
   const [records, setRecords] = React.useState([]);
+  const [selected, setSelected] = React.useState("person")
   const [isLoading, setIsLoading] = React.useState(true);
+  const [activeIndex, setActiveIndex] = React.useState(0);
   const [activeRecord, setActiveRecord] = React.useState("");
 
-  const handleActiveRecord = (rec) => {
+  const handleActiveRecord = (rec, index) => {
     setActiveRecord(rec);
+    setActiveIndex(index);
+  };
+
+  const handleSelect = (category) => {
+    setSelected(category.toLowerCase())
+  }
+
+  const addAnnotation = (text, category) => {
+    const local = JSON.parse(localStorage.getItem("records"));
+    (!local[activeIndex][category].includes(text) && text!=="") && local[activeIndex][category].push(text);
+    localStorage.setItem(
+      "records",
+      JSON.stringify(local)
+    );
   };
 
   React.useEffect(() => {
     const getRecords = () => {
       setIsLoading(true);
       const localRecords = JSON.parse(localStorage.getItem("records"));
-      console.log(localRecords);
       if (localRecords === "" || localRecords === null) {
         setIsLoading(true);
         axios
           .get("https://baconipsum.com/api/?type=meat-and-filler")
           .then((response) => {
-            console.log(response.data);
-            setRecords(response.data);
-            localStorage.setItem("records", JSON.stringify(response.data));
+            const data = response.data
+            data.forEach((res, index) => {
+              console.log(index, res)
+              let local = JSON.parse(localStorage.getItem("records"));
+              if (local !== null){
+                local[local.length] = { rec: res, person: [], org: [] };
+              localStorage.setItem(
+                "records",
+                JSON.stringify(local)
+              );
+            }
+              else {
+                localStorage.setItem(
+                  "records",
+                  JSON.stringify([{ rec: res, person: [], org: [] }])
+                );
+              }
+            });
           })
           .finally(() => {
+            const localRecords = JSON.parse(localStorage.getItem("records"))
+            setRecords(localRecords);
             setIsLoading(false);
           })
           .catch((error) => console.log(error));
@@ -51,6 +83,10 @@ export default function DataProvider({ children }) {
     isLoading,
     handleActiveRecord,
     activeRecord,
+    activeIndex,
+    addAnnotation,
+    handleSelect,
+    selected
   };
 
   return (

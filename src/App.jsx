@@ -8,7 +8,7 @@ function App() {
   return (
     <div className={app.app} style={{
       display: 'grid',
-      gridTemplateColumns: '1fr 2fr 1fr',
+      gridTemplateColumns: 'auto 2fr 1fr',
       gap: '1rem'
     }}>
       <LeftPannel />
