@@ -1,100 +1,140 @@
-import React from 'react'
-import { useDataContext } from '../context/DataContext';
-import mainpannel from '../styles/mainpannel.module.css'
+import React from "react";
+import { useDataContext } from "../context/DataContext";
+import mainpannel from "../styles/mainpannel.module.css";
+import Highlighter from "react-highlight-words";
 
 export function MainPannel() {
-  const { records, activeIndex } = useDataContext();
-  const [highlightText, setHighlightText] = React.useState("")
-  const [addText, setAddText] = React.useState(false)
+  const { records, activeIndex, handleSelect, selected, addAnnotation } =
+    useDataContext();
+  const [highlightText, setHighlightText] = React.useState("");
+  const [isPerson, setIsperson] = React.useState(false);
+  const [isOrg, setIsOrg] = React.useState(false);
+
   const handleMouseUp = () => {
-    const text = window.getSelection().toString()
-    setHighlightText(text)
-    if (text) {
-      setAddText(true)
-    }
-  }
-  
-  const handleFilterPersons = () => {
+    const text = window.getSelection().toString().trim();
+    setHighlightText(text);
     const personElement = document.getElementById("main-content").innerHTML;
-    records[activeIndex]["person"].forEach((word) => {
-     var pattern = new RegExp("(" + word + ")", "gi");
-     var new_text = personElement.replace(
-       pattern,
-       `<span style='background:rgba(206, 206, 5, 0.904); color:#7a06a4;'>` +
-         word +
-         `</span>`
-     );
-      console.log(new_text)
-      document.getElementById("main-content").innerHTML = new_text;
-    })
+    var pattern = new RegExp("(" + text + ")", "i");
+    if (
+      !records[activeIndex]["org"].includes(text) &&
+      !records[activeIndex]["person"].includes(text) &&
+      text !== ""
+    ) {
+      if (isPerson) {
+        console.log(highlightText, text);
+        addAnnotation(text);
+        document.getElementById("main-content").innerHTML =
+          personElement.replace(
+            pattern,
+            `<span style='background:rgb(218, 218, 28); color:#7a06a4; font-weight: bold', font-size: 17px>` +
+              text +
+              `<sub style='color:#7a06a4, font-size: 4px, font-weight: normal'> person </sub>` +
+              `</span>`
+          );
+      }
+      if (isOrg) {
+        addAnnotation(text);
+        document.getElementById("main-content").innerHTML =
+          personElement.replace(
+            pattern,
+            `<span style='background:#9625be; color:white; font-weight: bold', font-size: 17px>` +
+              text +
+              `<sub style='color:white, font-size: 4px, font-weight: normal'> org </sub>` +
+              `</span>`
+          );
+      }
     }
-  
+      
+  };
 
-    return (
-      <>
-        <div className={mainpannel.main}>
-          <div className={mainpannel.container}>
-            <div className={mainpannel.header}>
-              <button
-                className={mainpannel.button}
-                onClick={handleFilterPersons}
-              >
-                Person <sub>{records[activeIndex]["person"].length}</sub>
-              </button>
-              <button className={mainpannel.button}>
-                Org <sub>{records[activeIndex]["org"].length}</sub>
-              </button>
-            </div>
-            <div
-              id="main-content"
-              className={mainpannel.content}
-              onMouseUp={handleMouseUp}
-            >
-              {records[activeIndex].rec}
-            </div>
-          </div>
-        </div>
-        {addText && highlightText !== "" && (
-          <AddTextModal
-            addText={addText}
-            text={highlightText}
-            isClose={(e) => setAddText(false)}
-          />
-        )}
-      </>
-    );
-}
+  React.useEffect(() => {
+    console.log(isPerson);
+    handleSelect(isPerson ? "person" : isOrg ? "org" : "");
+  }, [isPerson, isOrg]);
 
-function AddTextModal({ addText, text, isClose }) {
-  const { addAnnotation, handleSelect, selected } = useDataContext();
-  const modalRef = React.useRef()
-  const handleAdd = () => {
-    console.log(text, selected )
-    addAnnotation(text, selected)
-    // modalRef.current?.click()
-  }
+  const handleHighLight = (word, category) => {
+    const personElement = document.getElementById("main-content").innerHTML;
+    var pattern = new RegExp("(" + word + ")", "i");
+    if (category === "person") {
+      document.getElementById("main-content").innerHTML = personElement.replace(
+        pattern,
+        `<span style='background:rgb(218, 218, 28); color:#7a06a4; font-weight: bold', font-size: 17px>` +
+          word +
+          `<sub style='color:#7a06a4, font-size: 4px, font-weight: normal'> person </sub>` +
+          `</span>`
+      );
+    } else {
+      document.getElementById("main-content").innerHTML = personElement.replace(
+        pattern,
+        `<span style='background:#9625be; color:white; font-weight: bold', font-size: 17px>` +
+          word +
+          `<sub style='color:white, font-size: 4px, font-weight: normal'> org </sub>` +
+          `</span>`
+      );
+    }
+  };
+  React.useEffect(() => {
+    records[activeIndex]["person"].forEach((word) => {
+      handleHighLight(word, "person");
+    });
+    records[activeIndex]["org"].forEach((word) => {
+      handleHighLight(word, "org");
+    });
+  }, []);
+
   return (
     <>
-      <div className={mainpannel.overlay}></div>
-      <div tabIndex={0} className={mainpannel.modal} onBlur={isClose}>
-        <div className={mainpannel["modal-header"]}>
-          <div>{text}</div>
-          <div className="">
-            <label htmlFor="category" style={{marginRight: '0.5em'}}>Category</label>
-            <select name="category" id="category" value={selected} onChange={(e) => {
-              console.log(selected)
-              handleSelect(e.target.value)
-            }}>
-              <option value="person">Person</option>
-              <option value="org">Org</option>
-            </select>
+      <div className={mainpannel.main}>
+        <div className={mainpannel.container}>
+          <div className={mainpannel.header}>
+            <button
+              disabled={isOrg}
+              className={mainpannel.button}
+              onClick={(e) => {
+                setIsperson(!isPerson);
+              }}
+              style={{
+                color: isPerson ? "#7a06a4" : "#242424",
+                fontWeight: isPerson && "bold",
+                textTransform: isPerson && "uppercase",
+                cursor: isOrg ? "not-allowed" : "pointer",
+              }}
+            >
+              Person <sub>{records[activeIndex]["person"].length}</sub>
+            </button>
+            <button
+              disabled={isPerson}
+              className={mainpannel.button}
+              onClick={(e) => {
+                setIsOrg(!isOrg);
+              }}
+              style={{
+                color: isOrg ? "#7a06a4" : "#242424",
+                fontWeight: isOrg && "bold",
+                textTransform: isOrg && "uppercase",
+                cursor: isPerson ? "not-allowed" : "pointer",
+              }}
+            >
+              Org <sub>{records[activeIndex]["org"].length}</sub>
+            </button>
           </div>
-        </div>
-        <div className={mainpannel["modal-footer"]}>
-          <button className={mainpannel["modal-btn"]} ref={modalRef} onClick={isClose}>cancel</button>
-          <button className={mainpannel["modal-btn"]} onClick={handleAdd()}>add</button>
+          <div
+            id="main-content"
+            className={mainpannel.content}
+            onMouseUp={handleMouseUp}
+          >
+            {/* <Highlighter
+              highlightClassName="YourHighlightClass"
+              searchWords={toBeHighlighted}
+              autoEscape={true}
+              textToHighlight={records[activeIndex].rec}
+            /> */}
+            {records[activeIndex].rec}
+          </div>
         </div>
       </div>
     </>
   );
 }
+
+
