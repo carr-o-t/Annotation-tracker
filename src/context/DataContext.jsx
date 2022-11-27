@@ -13,7 +13,7 @@ export const useDataContext = () => {
 
 export default function DataProvider({ children }) {
   const [records, setRecords] = React.useState([]);
-  const [selected, setSelected] = React.useState("person")
+  const [selected, setSelected] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(true);
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [activeRecord, setActiveRecord] = React.useState("");
@@ -24,17 +24,33 @@ export default function DataProvider({ children }) {
   };
 
   const handleSelect = (category) => {
+    console.log(category)
     setSelected(category.toLowerCase())
   }
 
-  const addAnnotation = (text, category) => {
+  const addAnnotation = (text) => {
     const local = JSON.parse(localStorage.getItem("records"));
-    (!local[activeIndex][category].includes(text) && text!=="") && local[activeIndex][category].push(text);
-    localStorage.setItem(
-      "records",
-      JSON.stringify(local)
-    );
+    if(!local[activeIndex]["org"].includes(text) && !local[activeIndex]["person"].includes(text))
+    {
+      selected !== "" &&
+        !local[activeIndex][selected].includes(text) &&
+        text !== "" &&
+        local[activeIndex][selected].push(text);
+      localStorage.setItem("records", JSON.stringify(local));
+    }
+    setRecords(local);
   };
+
+  const removeAnnotation = (text, category) => {
+    console.log(category, text)
+    const local = JSON.parse(localStorage.getItem("records"));
+    local[activeIndex][category] = local[activeIndex][category].filter(
+      (word) => word !== text
+    );
+    console.log(local)
+    localStorage.setItem("records", JSON.stringify(local))
+    setRecords(local)
+  }
 
   React.useEffect(() => {
     const getRecords = () => {
@@ -47,7 +63,6 @@ export default function DataProvider({ children }) {
           .then((response) => {
             const data = response.data
             data.forEach((res, index) => {
-              console.log(index, res)
               let local = JSON.parse(localStorage.getItem("records"));
               if (local !== null){
                 local[local.length] = { rec: res, person: [], org: [] };
@@ -78,6 +93,10 @@ export default function DataProvider({ children }) {
     getRecords();
   }, []);
 
+  React.useEffect(() => {
+    // console.log(records)
+  }, [records])
+
   const values = {
     records,
     isLoading,
@@ -86,7 +105,8 @@ export default function DataProvider({ children }) {
     activeIndex,
     addAnnotation,
     handleSelect,
-    selected
+    selected,
+    removeAnnotation,
   };
 
   return (
