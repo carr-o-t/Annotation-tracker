@@ -21,7 +21,6 @@ export function MainPannel() {
       text !== ""
     ) {
       if (isPerson) {
-        console.log(highlightText, text);
         addAnnotation(text);
         document.getElementById("main-content").innerHTML =
           personElement.replace(
@@ -48,7 +47,6 @@ export function MainPannel() {
   };
 
   React.useEffect(() => {
-    console.log(isPerson);
     handleSelect(isPerson ? "person" : isOrg ? "org" : "");
   }, [isPerson, isOrg]);
 

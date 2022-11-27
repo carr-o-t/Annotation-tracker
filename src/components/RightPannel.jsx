@@ -36,7 +36,6 @@ export function RightPannel() {
                 <li
                   className={rightpannel["list-items"]}
                   onClick={(e) => {
-                    console.log(item, "person");
                   }}
                 >
                   <div className={rightpannel["list-item-text"]}>

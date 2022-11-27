@@ -24,7 +24,6 @@ export default function DataProvider({ children }) {
   };
 
   const handleSelect = (category) => {
-    console.log(category)
     setSelected(category.toLowerCase())
   }
 
@@ -42,12 +41,10 @@ export default function DataProvider({ children }) {
   };
 
   const removeAnnotation = (text, category) => {
-    console.log(category, text)
     const local = JSON.parse(localStorage.getItem("records"));
     local[activeIndex][category] = local[activeIndex][category].filter(
       (word) => word !== text
     );
-    console.log(local)
     localStorage.setItem("records", JSON.stringify(local))
     setRecords(local)
   }
@@ -94,7 +91,6 @@ export default function DataProvider({ children }) {
   }, []);
 
   React.useEffect(() => {
-    // console.log(records)
   }, [records])
 
   const values = {
