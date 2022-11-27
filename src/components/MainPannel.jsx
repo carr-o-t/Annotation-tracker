@@ -1,6 +1,7 @@
 import React from "react";
 import { useDataContext } from "../context/DataContext";
 import mainpannel from "../styles/mainpannel.module.css";
+import Highlighter from "react-highlight-words";
 
 export function MainPannel() {
   const { records, activeIndex, handleSelect, selected, addAnnotation } =
@@ -26,7 +27,7 @@ export function MainPannel() {
             pattern,
             `<span style='background:rgb(218, 218, 28); color:#7a06a4; font-weight: bold', font-size: 17px>` +
               text +
-              // `<sub style='color:#7a06a4, font-size: 4px, font-weight: normal'> person </sub>` +
+              `<sub style='color:#7a06a4, font-size: 4px, font-weight: normal'> person </sub>` +
               `</span>`
           );
       }
@@ -37,33 +38,16 @@ export function MainPannel() {
             pattern,
             `<span style='background:#9625be; color:white; font-weight: bold', font-size: 17px>` +
               text +
-              // `<sub style='color:white, font-size: 4px, font-weight: normal'> org </sub>` +
+              `<sub style='color:white, font-size: 4px, font-weight: normal'> org </sub>` +
               `</span>`
           );
       }
     }
+      
   };
 
   React.useEffect(() => {
     handleSelect(isPerson ? "person" : isOrg ? "org" : "");
-    if (isPerson) {
-      records[activeIndex]["person"].forEach((word) => {
-        handleHighLight(word, "person");
-      });
-    } else {
-      records[activeIndex]["person"].forEach((word) => {
-        handleRemoveHighLight(word, "person");
-      });
-    }
-    if (isOrg) {
-      records[activeIndex]["org"].forEach((word) => {
-        handleHighLight(word, "org");
-      });
-    } else {
-      records[activeIndex]["org"].forEach((word) => {
-        handleRemoveHighLight(word, "org");
-      });
-    }
   }, [isPerson, isOrg]);
 
   const handleHighLight = (word, category) => {
@@ -72,42 +56,29 @@ export function MainPannel() {
     if (category === "person") {
       document.getElementById("main-content").innerHTML = personElement.replace(
         pattern,
-        `<span style='background:rgb(218, 218, 28); color:#7a06a4; font-weight: bold'; font-size: 17px>` +
+        `<span style='background:rgb(218, 218, 28); color:#7a06a4; font-weight: bold', font-size: 17px>` +
           word +
-          // `<sub style='color:#7a06a4, font-size: 4px, font-weight: normal'> person </sub>` +
+          `<sub style='color:#7a06a4, font-size: 4px, font-weight: normal'> person </sub>` +
           `</span>`
       );
     } else {
       document.getElementById("main-content").innerHTML = personElement.replace(
         pattern,
-        `<span style='background:#9625be; color:white; font-weight: bold'; font-size: 17px>` +
+        `<span style='background:#9625be; color:white; font-weight: bold', font-size: 17px>` +
           word +
-          // `<sub style='color:white, font-size: 4px, font-weight: normal'> org </sub>` +
+          `<sub style='color:white, font-size: 4px, font-weight: normal'> org </sub>` +
           `</span>`
       );
     }
   };
-  const handleRemoveHighLight = (word, category) => {
-    const personElement = document.getElementById("main-content").innerHTML;
-    var pattern = new RegExp("(" + word + ")", "i");
-    if (category === "person") {
-      document.getElementById("main-content").innerHTML = personElement.replace(
-        pattern,
-        `<span style='background:white; color:#242424; font-weight: normal'; font-size: 16px>` +
-          word +
-          // `<sub style='color:#7a06a4, font-size: 4px, font-weight: normal'> person </sub>` +
-          `</span>`
-      );
-    } else {
-      document.getElementById("main-content").innerHTML = personElement.replace(
-        pattern,
-        `<span style='background:white; color:#242424; font-weight: normal'; font-size: 16px>` +
-          word +
-          // `<sub style='color:white, font-size: 4px, font-weight: normal'> org </sub>` +
-          `</span>`
-      );
-    }
-  };
+  React.useEffect(() => {
+    records[activeIndex]["person"].forEach((word) => {
+      handleHighLight(word, "person");
+    });
+    records[activeIndex]["org"].forEach((word) => {
+      handleHighLight(word, "org");
+    });
+  }, []);
 
   return (
     <>
@@ -150,6 +121,12 @@ export function MainPannel() {
             className={mainpannel.content}
             onMouseUp={handleMouseUp}
           >
+            {/* <Highlighter
+              highlightClassName="YourHighlightClass"
+              searchWords={toBeHighlighted}
+              autoEscape={true}
+              textToHighlight={records[activeIndex].rec}
+            /> */}
             {records[activeIndex].rec}
           </div>
         </div>
@@ -157,3 +134,5 @@ export function MainPannel() {
     </>
   );
 }
+
+
